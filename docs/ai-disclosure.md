@@ -22,6 +22,10 @@
 dua theo va sua lai cho dung voi yeu cau
 | :Gemini | kiểm tra các tiêu chí có trong Sáu bước xử lý một User Story | :User story | dựa theo và chỉnh sửa lại đúng với yêu cầu bài
 | :Gemini | gợi ý vẽ use case diagram và kiểm tra Bảy lỗi thường gặp khi vẽ Use Case Diagram | use care diagram | dựa theo và chỉnh lại đúng với đề bài
+| :Gemini | lam file api-contract.md | api-contract.md | da doc lai va sua lai dung voi yeu cau
+
+| :Gemini | lam file đặc tả yêu cầu phần mềm rút gọn | srs.md| da doc lai
+
 _Ghi chú:_
 
 ---
