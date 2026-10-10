@@ -2,7 +2,7 @@
 
 **Học phần:** Chuyên đề Tốt nghiệp 1 (Specialized Graduation Topic I)  
 **Học kỳ:** HK1, Năm học 2026 – 2027  
-**Bài nộp:** [X] Bài tập 1 (BT1) [X] Bài tập 2 (BT2) [ ] Bài tập 3 (BT3)
+**Bài nộp:** [X] Bài tập 1 (BT1) [] Bài tập 2 (BT2) [ ] Bài tập 3 (BT3)
 
 ---
 
@@ -25,6 +25,12 @@ dua theo va sua lai cho dung voi yeu cau
 | :Gemini | lam file api-contract.md | api-contract.md | da doc lai va sua lai dung voi yeu cau
 
 | :Gemini | lam file đặc tả yêu cầu phần mềm rút gọn | srs.md| da doc lai
+| :ChatGPT | :Gợi ý làm bảng ERD | :ERD | Đọc và sửa lại
+| :ChatGPT | :Gợi ý làm bảng Architecture
+Diagram | :Architecture Diagram | :Đọc và sửa lại đối chiếu với
+ERD và DDl
+| :| :ChatGPT | :Tạo 3 Wireframe | :Wireframe | :Đọc và chỉnh sửa lại đồng nhất
+với các thông tin
 
 _Ghi chú:_
 
@@ -35,4 +41,4 @@ _Ghi chú:_
 > **"Tôi xác nhận đã đọc, hiểu và chịu trách nhiệm về toàn bộ nội dung nộp."**
 
 - **Chữ ký / Họ tên sinh viên:** Nguyen Anh Tuan
-- **Ngày khai báo:** 26/09/2026 - 10/06/2026
+- **Ngày khai báo:** 10/10/2026
