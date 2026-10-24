@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f5f7fb">
+    <title>Khách hàng | Track SE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="#/dashboard" aria-label="Track SE trang chủ">
+          <span class="brand-mark">T</span>
+          <span class="brand-name">track<span>SE</span><small>CUSTOMER PLATFORM</small></span>
+        </a>
+        <div class="workspace-label">WORKSPACE</div>
+        <nav class="primary-nav" aria-label="Điều hướng chính">
+          <a href="#/dashboard" data-nav="dashboard"><span class="nav-icon">▦</span> Dashboard <span class="nav-arrow">›</span></a>
+          <a href="#/customers" data-nav="customers"><span class="nav-icon">♙</span> Hồ sơ khách hàng</a>
+        </nav>
+        <div class="sidebar-divider"></div>
+        <div class="workspace-label">QUẢN LÝ</div>
+        <div class="sidebar-item"><span class="nav-icon">◇</span> Phân khúc <span class="soon">LIVE</span></div>
+        <div class="sidebar-item"><span class="nav-icon">▤</span> Giao dịch</div>
+        <div class="sidebar-bottom">
+          <div class="help-card"><div class="help-icon">✳</div><strong>Cần hỗ trợ?</strong><p>Quản lý khách hàng dễ dàng hơn cùng Track SE.</p><a href="#/customers">Khám phá dữ liệu <span>→</span></a></div>
+          <div class="profile"><div class="profile-avatar">AT</div><div><strong>Admin Track SE</strong><small>Quản trị viên</small></div><span class="profile-menu">•••</span></div>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <header class="topbar">
+          <div class="breadcrumb"><span>Workspace</span><b>/</b><strong id="breadcrumb-current">Dashboard</strong></div>
+          <div class="topbar-actions"><span class="live-indicator"><i></i> Dữ liệu trực tiếp</span><button class="icon-button notification" aria-label="Thông báo">♧<i></i></button><div class="top-avatar">AT</div></div>
+        </header>
+        <div id="app-view" class="page-content" aria-live="polite"></div>
+        <footer class="footer"><span>© 2026 Track SE CRM</span><span>Được thiết kế để phát triển cùng bạn <b>✳</b></span></footer>
+      </main>
+    </div>
+    <div id="toast" class="toast" role="status"></div>
+    <dialog id="customer-dialog" class="customer-dialog">
+      <form id="customer-form" method="dialog">
+        <div class="dialog-heading"><div><span class="eyebrow">HỒ SƠ MỚI</span><h2>Thêm khách hàng</h2></div><button type="button" class="icon-button" data-close-dialog aria-label="Đóng">×</button></div>
+        <label>Họ và tên<input name="name" required maxlength="100" placeholder="Nguyễn Văn A"></label>
+        <label>Số điện thoại<input name="phone" required inputmode="numeric" placeholder="0901234567"></label>
+        <div class="dialog-actions"><button type="button" class="button button-quiet" data-close-dialog>Hủy</button><button type="submit" class="button button-primary">Tạo hồ sơ <span>→</span></button></div>
+      </form>
+    </dialog>
+  </body>
+</html>
