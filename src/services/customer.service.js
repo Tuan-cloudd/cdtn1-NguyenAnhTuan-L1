@@ -25,6 +25,11 @@ async function updateCustomer(value, body) {
   return repository.update(customer.id, validator.validateUpdateCustomer(body));
 }
 
+async function deleteCustomer(value) {
+  const customer = await getCustomer(value);
+  await repository.remove(customer.id);
+}
+
 async function changeCustomerStatus(value, body) {
   const customer = await getCustomer(value);
   const status = validator.validateStatus(body);
@@ -50,6 +55,6 @@ async function mergeCustomers(body) {
 }
 
 module.exports = {
-  createCustomer, listCustomers, getCustomer, updateCustomer,
+  createCustomer, listCustomers, getCustomer, updateCustomer, deleteCustomer,
   changeCustomerStatus, addCustomerTags, getCustomerTransactions, mergeCustomers,
 };

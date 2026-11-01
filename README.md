@@ -20,6 +20,9 @@ Backend REST API quản lý hồ sơ khách hàng, gồm tạo và cập nhật 
 2. Chạy `npm install`.
 3. Chạy `npm run db:migrate` để tạo schema và nạp dữ liệu mẫu.
 4. Chạy `npm run dev`, sau đó mở `http://localhost:3000` để sử dụng giao diện hoặc kiểm tra API tại `http://localhost:3000/health`.
+5. Đăng nhập bằng tài khoản demo `admin@example.com` / `Admin123!` hoặc `sales@example.com` / `Sales123!`. Đây là tài khoản dùng thử, không sử dụng các mật khẩu này ở môi trường production.
+
+API đăng nhập tại `POST /api/auth/login` trả về Bearer token có hiệu lực 8 giờ. Các endpoint `/api/customers` yêu cầu token trong `Authorization: Bearer <token>`; `GET /api/auth/me` xác nhận phiên và `POST /api/auth/logout` kết thúc phiên.
 
 ## 4. Cấu trúc thư mục
 

@@ -5,8 +5,7 @@ const service = require('../services/customer.service');
 const router = express.Router();
 
 function requireAdmin(req, res, next) {
-  const identity = `${req.get('x-user-role') || ''} ${req.get('Authorization') || ''}`.toLowerCase();
-  if (!identity.includes('qtv') && !identity.includes('admin')) {
+  if (req.user.role !== 'QTV') {
     next(new AppError(403, 'FORBIDDEN', 'Chỉ Quản trị viên mới có quyền thực hiện thao tác này'));
     return;
   }
@@ -19,6 +18,11 @@ router.get('/', async (req, res) => res.json(await service.listCustomers(req.que
 router.post('/merge', requireAdmin, async (req, res) => {
   const result = await service.mergeCustomers(req.body);
   res.json({ message: 'Gộp hồ sơ thành công', ...result });
+});
+
+router.delete('/:id', requireAdmin, async (req, res) => {
+  await service.deleteCustomer(req.params.id);
+  res.status(204).end();
 });
 
 router.get('/:id/transactions', async (req, res) => {

@@ -1,0 +1,3 @@
+ALTER TABLE customer ADD COLUMN address TEXT NULL;
+ALTER TABLE customer ADD COLUMN birth_date TEXT NULL;
+ALTER TABLE customer ADD COLUMN notes TEXT NULL;

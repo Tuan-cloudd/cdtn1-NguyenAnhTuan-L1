@@ -3,6 +3,7 @@ const path = require('path');
 
 const databasePath = process.env.DB_PATH || path.join(__dirname, '..', '..', 'data', 'app.db');
 const db = new sqlite3.Database(databasePath);
+db.run('PRAGMA foreign_keys = ON');
 
 function run(sql, params = []) {
   return new Promise((resolve, reject) => {

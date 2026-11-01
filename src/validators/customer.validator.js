@@ -21,10 +21,36 @@ function validateUpdateCustomer(body) {
     updates.name = name;
   }
   if (Object.hasOwn(body, 'email')) {
-    if (typeof body.email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email.trim())) {
+    if (typeof body.email !== 'string') {
       throw new AppError(400, 'VALIDATION_ERROR', 'Định dạng email không hợp lệ');
     }
-    updates.email = body.email.trim();
+    const email = body.email.trim();
+    if (email.length > 150 || (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) {
+      throw new AppError(400, 'VALIDATION_ERROR', 'Định dạng email không hợp lệ');
+    }
+    updates.email = email || null;
+  }
+  if (Object.hasOwn(body, 'address')) {
+    if (typeof body.address !== 'string' || body.address.trim().length > 250) {
+      throw new AppError(400, 'VALIDATION_ERROR', 'Địa chỉ không được vượt quá 250 ký tự');
+    }
+    updates.address = body.address.trim() || null;
+  }
+  if (Object.hasOwn(body, 'birthDate')) {
+    const birthDate = typeof body.birthDate === 'string' ? body.birthDate.trim() : '';
+    if (birthDate && (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate)
+      || Number.isNaN(Date.parse(`${birthDate}T00:00:00Z`))
+      || new Date(`${birthDate}T00:00:00Z`).toISOString().slice(0, 10) !== birthDate
+      || birthDate > new Date().toISOString().slice(0, 10))) {
+      throw new AppError(400, 'VALIDATION_ERROR', 'Ngày sinh không hợp lệ');
+    }
+    updates.birthDate = birthDate || null;
+  }
+  if (Object.hasOwn(body, 'notes')) {
+    if (typeof body.notes !== 'string' || body.notes.trim().length > 1000) {
+      throw new AppError(400, 'VALIDATION_ERROR', 'Ghi chú không được vượt quá 1000 ký tự');
+    }
+    updates.notes = body.notes.trim() || null;
   }
   if (Object.keys(updates).length === 0) {
     throw new AppError(400, 'VALIDATION_ERROR', 'Cần cung cấp thông tin cần cập nhật');

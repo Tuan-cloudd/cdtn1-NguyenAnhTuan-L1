@@ -7,6 +7,9 @@ function serializeCustomer(row) {
     name: row.full_name,
     phone: row.phone,
     email: row.email || null,
+    address: row.address || null,
+    birthDate: row.birth_date || null,
+    notes: row.notes || null,
     status: String(row.status || 'ACTIVE').toLowerCase(),
     tags: typeof row.tags === 'string' && row.tags
       ? row.tags.split(',').map((tag) => tag.trim()).filter(Boolean)
@@ -77,10 +80,26 @@ async function update(id, updates) {
     fields.push('email = ?');
     values.push(updates.email);
   }
+  if (Object.hasOwn(updates, 'address')) {
+    fields.push('address = ?');
+    values.push(updates.address);
+  }
+  if (Object.hasOwn(updates, 'birthDate')) {
+    fields.push('birth_date = ?');
+    values.push(updates.birthDate);
+  }
+  if (Object.hasOwn(updates, 'notes')) {
+    fields.push('notes = ?');
+    values.push(updates.notes);
+  }
   fields.push('updated_at = CURRENT_TIMESTAMP');
   values.push(id);
   await run(`UPDATE customer SET ${fields.join(', ')} WHERE customer_id = ?`, values);
   return findById(id);
+}
+
+async function remove(id) {
+  await run('DELETE FROM customer WHERE customer_id = ?', [id]);
 }
 
 async function setStatus(id, status) {
@@ -124,5 +143,5 @@ async function merge(sourceId, targetId) {
 }
 
 module.exports = {
-  findById, findAll, findByPhone, create, update, setStatus, addTags, findTransactions, merge,
+  findById, findAll, findByPhone, create, update, remove, setStatus, addTags, findTransactions, merge,
 };

@@ -1,6 +1,8 @@
 ﻿const express = require('express');
 const path = require('path');
 const customerRoutes = require('./routes/customer.routes');
+const authRoutes = require('./routes/auth.routes');
+const requireAuth = require('./middleware/requireAuth');
 const AppError = require('./errors/AppError');
 
 const app = express();
@@ -10,7 +12,8 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'Track SE Customer Service' });
 });
 app.use(express.static(path.join(__dirname, '..', 'public')));
-app.use('/api/customers', customerRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/customers', requireAuth, customerRoutes);
 app.use((req, res, next) => {
   next(new AppError(404, 'ROUTE_NOT_FOUND', 'Đường dẫn không tồn tại'));
 });

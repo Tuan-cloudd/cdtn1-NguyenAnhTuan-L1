@@ -6,6 +6,7 @@ const dialog = document.querySelector('#customer-dialog');
 const customerForm = document.querySelector('#customer-form');
 let customers = [];
 let toastTimer;
+let currentUserRole = '';
 
 const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
@@ -16,13 +17,47 @@ const formatMoney = (amount) => new Intl.NumberFormat('vi-VN', { style: 'currenc
 const titleCase = (value) => String(value || '').replace(/_/g, ' ').replace(/\b\w/g, (letter) => letter.toLocaleUpperCase('vi'));
 
 async function api(url, options = {}) {
+  const token = localStorage.getItem('trackse-token');
   const response = await fetch(url, {
     ...options,
-    headers: { ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...(options.headers || {}) },
+    headers: {
+      ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+      ...(token && url !== '/api/auth/login' ? { Authorization: `Bearer ${token}` } : {}),
+      ...(options.headers || {}),
+    },
   });
   const result = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(result.message || `Yêu cầu thất bại (${response.status})`);
+  if (!response.ok) {
+    const error = new Error(result.message || `Yêu cầu thất bại (${response.status})`);
+    error.status = response.status;
+    throw error;
+  }
   return result;
+}
+
+function showLogin(message = '') {
+  document.body.classList.add('auth-required');
+  appView.innerHTML = `
+    <section class="login-card">
+      <div class="brand-mark">T</div>
+      <span class="eyebrow">TRACK SE CUSTOMER PLATFORM</span>
+      <h1>Đăng nhập</h1>
+      <p>Đăng nhập để tiếp tục quản lý hồ sơ khách hàng.</p>
+      <form id="login-form">
+        <label>Email<input name="email" type="email" autocomplete="username" required value="admin@example.com"></label>
+        <label>Mật khẩu<input name="password" type="password" autocomplete="current-password" required autofocus></label>
+        <div class="login-error" role="alert">${escapeHtml(message)}</div>
+        <button class="button button-primary" type="submit">Đăng nhập</button>
+      </form>
+      <small class="login-demo">Tài khoản dùng thử: admin@example.com / Admin123!</small>
+    </section>`;
+}
+
+function showProfile(user) {
+  document.body.classList.remove('auth-required');
+  currentUserRole = user.role;
+  document.querySelector('#profile-name').textContent = user.name;
+  document.querySelector('#profile-role').textContent = user.role === 'QTV' ? 'Quản trị viên' : 'Nhân viên kinh doanh';
 }
 
 function showToast(message, isError = false) {
@@ -36,12 +71,8 @@ function resetCustomerDialog() {
   customerForm.reset();
   customerForm.dataset.mode = 'create';
   delete customerForm.dataset.customerId;
-  const phoneInput = customerForm.querySelectorAll('input')[1];
-  phoneInput.name = 'phone';
-  phoneInput.type = 'tel';
-  phoneInput.required = true;
-  phoneInput.placeholder = '0901234567';
-  dialog.querySelector('label:nth-of-type(2)').firstChild.textContent = 'Số điện thoại';
+  customerForm.elements.phone.closest('label').hidden = false;
+  customerForm.querySelector('.optional-fields').hidden = true;
   dialog.querySelector('.eyebrow').textContent = 'HỒ SƠ MỚI';
   dialog.querySelector('h2').textContent = 'Thêm khách hàng';
   customerForm.querySelector('[type="submit"]').innerHTML = 'Tạo hồ sơ <span>→</span>';
@@ -152,10 +183,10 @@ async function renderCustomerDetail(id) {
     : '<div class="empty-state" style="padding:22px 5px">Chưa có giao dịch được ghi nhận cho hồ sơ này.</div>';
   const totalValue = transactions.reduce((sum, transaction) => sum + Number(transaction.amount || 0), 0);
   appView.innerHTML = `<a class="detail-back" href="#/customers">← Quay lại danh sách khách hàng</a>
-    <div class="page-heading detail-heading"><div class="detail-title"><span class="customer-avatar">${escapeHtml(initials(customer.name))}</span><div><span class="eyebrow">HỒ SƠ #${customer.id}</span><h1>${escapeHtml(customer.name)}</h1><p>${escapeHtml(customer.phone)} · Tạo ngày ${escapeHtml(formatDate(customer.createdAt))}</p></div></div><div class="detail-actions"><button class="button button-quiet" data-edit-customer="${customer.id}">Chỉnh sửa</button>${statusBadge(customer.status)}</div></div>
+    <div class="page-heading detail-heading"><div class="detail-title"><span class="customer-avatar">${escapeHtml(initials(customer.name))}</span><div><span class="eyebrow">HỒ SƠ #${customer.id}</span><h1>${escapeHtml(customer.name)}</h1><p>${escapeHtml(customer.phone)} · Tạo ngày ${escapeHtml(formatDate(customer.createdAt))}</p></div></div><div class="detail-actions"><button class="button button-quiet" data-edit-customer="${customer.id}">Chỉnh sửa</button>${currentUserRole === 'QTV' ? `<button class="button button-danger" data-delete-customer="${customer.id}">Xóa hồ sơ</button>` : ''}${statusBadge(customer.status)}</div></div>
     <div class="detail-grid"><div>
       <article class="panel"><div class="panel-heading"><div><h2>Thông tin khách hàng</h2><p>Thông tin liên hệ và phân loại hồ sơ</p></div></div>
-        <div class="info-grid"><div><div class="info-label">HỌ VÀ TÊN</div><div class="info-value">${escapeHtml(customer.name)}</div></div><div><div class="info-label">SỐ ĐIỆN THOẠI</div><div class="info-value">${escapeHtml(customer.phone)}</div></div><div><div class="info-label">EMAIL</div><div class="info-value">${escapeHtml(customer.email || 'Chưa cập nhật')}</div></div><div><div class="info-label">TRẠNG THÁI</div><div class="info-value">${statusBadge(customer.status)}</div></div><div><div class="info-label">NGÀY TẠO HỒ SƠ</div><div class="info-value">${escapeHtml(formatDate(customer.createdAt))}</div></div><div><div class="info-label">CẬP NHẬT GẦN NHẤT</div><div class="info-value">${escapeHtml(formatDate(customer.updatedAt))}</div></div><div><div class="info-label">PHÂN KHÚC / NHÃN</div><div class="detail-tags">${tagMarkup(customer.tags)}</div></div></div>
+        <div class="info-grid"><div><div class="info-label">HỌ VÀ TÊN</div><div class="info-value">${escapeHtml(customer.name)}</div></div><div><div class="info-label">SỐ ĐIỆN THOẠI</div><div class="info-value">${escapeHtml(customer.phone)}</div></div><div><div class="info-label">EMAIL</div><div class="info-value">${escapeHtml(customer.email || 'Chưa cập nhật')}</div></div><div><div class="info-label">ĐỊA CHỈ</div><div class="info-value">${escapeHtml(customer.address || 'Chưa cập nhật')}</div></div><div><div class="info-label">NGÀY SINH</div><div class="info-value">${escapeHtml(customer.birthDate ? formatDate(`${customer.birthDate}T00:00:00`) : 'Chưa cập nhật')}</div></div><div><div class="info-label">GHI CHÚ</div><div class="info-value">${escapeHtml(customer.notes || 'Chưa cập nhật')}</div></div><div><div class="info-label">TRẠNG THÁI</div><div class="info-value">${statusBadge(customer.status)}</div></div><div><div class="info-label">NGÀY TẠO HỒ SƠ</div><div class="info-value">${escapeHtml(formatDate(customer.createdAt))}</div></div><div><div class="info-label">CẬP NHẬT GẦN NHẤT</div><div class="info-value">${escapeHtml(formatDate(customer.updatedAt))}</div></div><div><div class="info-label">PHÂN KHÚC / NHÃN</div><div class="detail-tags">${tagMarkup(customer.tags)}</div></div></div>
       </article>
       <article class="panel detail-section"><div class="panel-heading"><div><h2>Lịch sử giao dịch</h2><p>${transactions.length} giao dịch được ghi nhận</p></div><span class="tag green">${escapeHtml(formatMoney(totalValue))}</span></div><div class="timeline">${transactionRows}</div></article>
     </div><aside><article class="panel"><div class="panel-heading"><div><h2>Phân loại khách hàng</h2><p>Nhãn giúp tìm kiếm và phân khúc</p></div></div><div class="detail-tags">${tagMarkup(customer.tags)}</div><p class="detail-hint">Thêm nhãn để sắp xếp khách hàng theo nhóm như VIP, khách hàng mới hoặc nhóm cần chăm sóc.</p><button class="button button-quiet button-small" style="margin-top:13px" data-add-tag="${customer.id}">＋ Thêm nhãn</button></article>
@@ -165,8 +196,14 @@ async function renderCustomerDetail(id) {
 async function render() {
   const route = window.location.hash.slice(1) || '/dashboard';
   document.querySelectorAll('[data-nav]').forEach((item) => item.classList.toggle('active', route.startsWith(`/${item.dataset.nav}`)));
+  if (!localStorage.getItem('trackse-token')) {
+    showLogin();
+    return;
+  }
   appView.innerHTML = '<div class="loading">Đang tải dữ liệu khách hàng…</div>';
   try {
+    const user = await api('/api/auth/me');
+    showProfile(user);
     if (route.startsWith('/customers/')) {
       await renderCustomerDetail(route.split('/')[2]);
       return;
@@ -175,12 +212,27 @@ async function render() {
     if (route === '/customers') renderCustomerList();
     else renderDashboard();
   } catch (error) {
+    if (error.status === 401) {
+      localStorage.removeItem('trackse-token');
+      showLogin(error.message);
+      return;
+    }
     appView.innerHTML = `<div class="panel empty-state"><strong>Không thể tải dữ liệu</strong><p style="margin:8px 0 13px">${escapeHtml(error.message)}</p><button class="button button-quiet" data-retry>Tải lại</button></div>`;
     showToast(error.message, true);
   }
 }
 
 document.addEventListener('click', async (event) => {
+  if (event.target.closest('[data-logout]')) {
+    try {
+      await api('/api/auth/logout', { method: 'POST' });
+    } catch (error) {
+      if (error.status !== 401) showToast(error.message, true);
+    }
+    localStorage.removeItem('trackse-token');
+    render();
+    return;
+  }
   const addCustomer = event.target.closest('[data-add-customer]');
   if (addCustomer) {
     resetCustomerDialog();
@@ -199,17 +251,30 @@ document.addEventListener('click', async (event) => {
     customerForm.dataset.mode = 'edit';
     customerForm.dataset.customerId = customer.id;
     customerForm.elements.name.value = customer.name;
-    const emailInput = customerForm.querySelectorAll('input')[1];
-    emailInput.value = customer.email || '';
-    emailInput.required = false;
-    emailInput.placeholder = 'name@example.com';
-    emailInput.name = 'email';
+    customerForm.elements.phone.closest('label').hidden = true;
+    customerForm.querySelector('.optional-fields').hidden = false;
+    customerForm.elements.email.value = customer.email || '';
+    customerForm.elements.address.value = customer.address || '';
+    customerForm.elements.birthDate.value = customer.birthDate || '';
+    customerForm.elements.notes.value = customer.notes || '';
     dialog.querySelector('.eyebrow').textContent = 'CẬP NHẬT HỒ SƠ';
     dialog.querySelector('h2').textContent = 'Chỉnh sửa khách hàng';
-    dialog.querySelector('label:nth-of-type(2)').firstChild.textContent = 'Email';
     customerForm.querySelector('[type="submit"]').innerHTML = 'Lưu thay đổi <span>→</span>';
-    emailInput.type = 'email';
     dialog.showModal();
+  }
+  const deleteButton = event.target.closest('[data-delete-customer]');
+  if (deleteButton) {
+    if (currentUserRole !== 'QTV') return;
+    if (!window.confirm('Bạn có chắc muốn xóa hồ sơ khách hàng này? Thao tác này không thể hoàn tác.')) return;
+    deleteButton.disabled = true;
+    try {
+      await api(`${API}/${deleteButton.dataset.deleteCustomer}`, { method: 'DELETE' });
+      showToast('Đã xóa hồ sơ khách hàng.');
+      window.location.hash = '/customers';
+    } catch (error) {
+      deleteButton.disabled = false;
+      showToast(error.message, true);
+    }
   }
   const tagButton = event.target.closest('[data-add-tag]');
   if (tagButton) {
@@ -223,12 +288,42 @@ document.addEventListener('click', async (event) => {
   }
 });
 
+appView.addEventListener('submit', async (event) => {
+  if (event.target.id !== 'login-form') return;
+  event.preventDefault();
+  const form = event.target;
+  const button = form.querySelector('[type="submit"]');
+  const errorMessage = form.querySelector('.login-error');
+  button.disabled = true;
+  button.textContent = 'Đang đăng nhập…';
+  errorMessage.textContent = '';
+  try {
+    const credentials = Object.fromEntries(new FormData(form));
+    const session = await api('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    });
+    localStorage.setItem('trackse-token', session.token);
+    render();
+  } catch (error) {
+    errorMessage.textContent = error.message;
+    button.disabled = false;
+    button.textContent = 'Đăng nhập';
+  }
+});
+
 customerForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   const formData = new FormData(customerForm);
   const mode = customerForm.dataset.mode || 'create';
   const body = mode === 'edit'
-    ? { name: formData.get('name'), ...(formData.get('email') ? { email: formData.get('email') } : {}) }
+    ? {
+      name: formData.get('name'),
+      email: formData.get('email'),
+      address: formData.get('address'),
+      birthDate: formData.get('birthDate'),
+      notes: formData.get('notes'),
+    }
     : { name: formData.get('name'), phone: formData.get('phone') };
   try {
     const created = await api(mode === 'edit' ? `${API}/${customerForm.dataset.customerId}` : API, {
