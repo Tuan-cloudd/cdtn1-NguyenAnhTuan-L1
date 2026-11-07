@@ -7,3 +7,7 @@ Biểu mẫu chỉnh sửa hồ sơ cho phép cập nhật các thông tin khôn
 ## Xóa hồ sơ
 
 Chỉ tài khoản Quản trị viên (QTV) được nhìn thấy và sử dụng nút xóa hồ sơ. Giao diện yêu cầu xác nhận trước khi gọi API; API tiếp tục kiểm tra vai trò để bảo vệ thao tác. Hồ sơ không tồn tại trả về lỗi 404. Xóa hồ sơ cũng xóa các nhãn và giao dịch liên kết theo khóa ngoại; hồ sơ khác từng gộp vào hồ sơ này vẫn được giữ lại.
+
+## Thay doi thiet ke BT 2
+
+- khong co
