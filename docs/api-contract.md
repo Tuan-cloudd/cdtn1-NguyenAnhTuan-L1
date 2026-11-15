@@ -27,6 +27,10 @@
 | **GET**     | `/api/customers/{id}/transactions` | Xem lịch sử giao dịch[cite: 10]        | US7        | NVKD      |
 | **PATCH**   | `/api/customers/{id}/status`       | Khóa hoặc mở khóa hồ sơ[cite: 10]      | US8        | QTV       |
 
+`POST /api/customers` chỉ dành cho tài khoản NVKD; hồ sơ ghi nhận đúng tài khoản đang đăng nhập là người tạo. API xem lịch sử giao dịch hỗ trợ `page`, `limit` và `search` (tìm theo loại hành vi). Khi gộp hồ sơ, nhãn và giao dịch của hồ sơ nguồn được chuyển sang hồ sơ đích trong cùng transaction; nhãn trùng chỉ giữ một bản.
+
+Ví dụ phân trang: `GET /api/customers/1/transactions?page=1&limit=20`. `page` bắt đầu từ 1; `limit` từ 1 đến 100. Nếu chỉ truyền một trong hai tham số, tham số còn lại mặc định lần lượt là `page=1` hoặc `limit=20`. `search` là từ khóa tối đa 100 ký tự để lọc `behavior_cat`. Response vẫn là một mảng giao dịch.
+
 ---
 
 ## 3. Chi tiết từng Endpoint và Bảng Validation

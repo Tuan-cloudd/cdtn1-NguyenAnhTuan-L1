@@ -87,6 +87,12 @@ function statusBadge(status) {
   return `<span class="status ${escapeHtml(status)}">${escapeHtml(statusLabel(status))}</span>`;
 }
 
+function createCustomerButton() {
+  return currentUserRole === 'NVKD'
+    ? '<button class="button button-primary" data-add-customer>＋ <span>Thêm khách hàng</span></button>'
+    : '';
+}
+
 function tagMarkup(tags = []) {
   if (!tags.length) return '<span class="tag gray">Chưa phân loại</span>';
   return tags.slice(0, 2).map((tag, index) => `<span class="tag ${index === 1 ? 'green' : ''}">${escapeHtml(tag)}</span>`).join('');
@@ -132,7 +138,7 @@ function renderDashboard() {
   const recent = customers.slice(0, 5);
 
   appView.innerHTML = `
-    <div class="page-heading"><div><span class="eyebrow">TỔNG QUAN</span><h1>Dashboard Phân loại</h1><p>Theo dõi hồ sơ và phân khúc khách hàng của bạn.</p></div><button class="button button-primary" data-add-customer>＋ <span>Thêm khách hàng</span></button></div>
+    <div class="page-heading"><div><span class="eyebrow">TỔNG QUAN</span><h1>Dashboard Phân loại</h1><p>Theo dõi hồ sơ và phân khúc khách hàng của bạn.</p></div>${createCustomerButton()}</div>
     <section class="metric-grid">
       <article class="metric-card"><div class="metric-top">Tổng khách hàng <span class="metric-icon">♙</span></div><div class="metric-value">${total}</div><div class="metric-note">Tổng hồ sơ trong hệ thống</div></article>
       <article class="metric-card"><div class="metric-top">Đang hoạt động <span class="metric-icon green">✓</span></div><div class="metric-value">${active.length}</div><div class="metric-note"><strong>${total ? Math.round(active.length / total * 100) : 0}%</strong> hồ sơ đang hoạt động</div></article>
@@ -153,7 +159,7 @@ function renderDashboard() {
 
 function renderCustomerList() {
   breadcrumb.textContent = 'Hồ sơ khách hàng';
-  appView.innerHTML = `<div class="page-heading"><div><span class="eyebrow">KHÁCH HÀNG</span><h1>Danh sách Hồ sơ Khách hàng</h1><p>Quản lý thông tin liên hệ, nhãn và trạng thái hồ sơ.</p></div><button class="button button-primary" data-add-customer>＋ <span>Thêm khách hàng</span></button></div>
+  appView.innerHTML = `<div class="page-heading"><div><span class="eyebrow">KHÁCH HÀNG</span><h1>Danh sách Hồ sơ Khách hàng</h1><p>Quản lý thông tin liên hệ, nhãn và trạng thái hồ sơ.</p></div>${createCustomerButton()}</div>
     <div class="toolbar"><label class="search-box"><span>⌕</span><input id="customer-search" type="search" placeholder="Tìm theo tên, số điện thoại hoặc email..." aria-label="Tìm khách hàng"></label><select id="status-filter" aria-label="Lọc trạng thái"><option value="">Tất cả trạng thái</option><option value="active">Đang hoạt động</option><option value="locked">Đã khóa</option><option value="merged">Đã gộp</option></select><select id="tag-filter" aria-label="Lọc phân khúc"><option value="">Tất cả phân khúc</option>${[...new Set(customers.flatMap((customer) => customer.tags))].sort().map((tag) => `<option value="${escapeHtml(tag)}">${escapeHtml(tag)}</option>`).join('')}</select></div>
     <div class="list-summary"><span id="result-count"></span><span>Cập nhật theo dữ liệu trực tiếp</span></div><article class="panel table-panel" id="customer-list-table"></article>`;
   const search = document.querySelector('#customer-search');

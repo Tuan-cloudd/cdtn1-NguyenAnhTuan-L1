@@ -1,4 +1,4 @@
-const { all, get, run } = require('../database/connection');
+const { all, exec, get, run } = require('../database/connection');
 
 function serializeCustomer(row) {
   if (!row) return null;
@@ -59,12 +59,10 @@ async function findByPhone(phone) {
   return get('SELECT customer_id FROM customer WHERE phone = ?', [phone]);
 }
 
-async function create(customer) {
-  const user = await get("SELECT user_id FROM users WHERE role = 'NVKD' ORDER BY user_id LIMIT 1");
-  if (!user) throw new Error('Không tìm thấy tài khoản NVKD để ghi nhận người tạo hồ sơ');
+async function create(customer, createdBy) {
   const result = await run(
     'INSERT INTO customer (full_name, phone, created_by) VALUES (?, ?, ?)',
-    [customer.name, customer.phone, user.user_id],
+    [customer.name, customer.phone, createdBy],
   );
   return findById(result.lastID);
 }
@@ -124,22 +122,50 @@ async function addTags(customerId, tags) {
   return findById(customerId);
 }
 
-async function findTransactions(customerId) {
-  return all(`
+async function findTransactions(customerId, filters = {}) {
+  let query = `
     SELECT transaction_id AS id, customer_id AS customerId, amount,
       behavior_cat AS behavior, created_at AS createdAt
     FROM customer_transaction
     WHERE customer_id = ?
-    ORDER BY created_at DESC, transaction_id DESC
-  `, [customerId]);
+  `;
+  const params = [customerId];
+  if (filters.search) {
+    query += ' AND behavior_cat LIKE ?';
+    params.push(`%${filters.search}%`);
+  }
+  query += ' ORDER BY created_at DESC, transaction_id DESC';
+  if (filters.limit !== undefined) {
+    query += ' LIMIT ? OFFSET ?';
+    params.push(filters.limit, (filters.page - 1) * filters.limit);
+  }
+  return all(query, params);
 }
 
 async function merge(sourceId, targetId) {
-  await run(
-    'UPDATE customer SET merged_into_id = ?, status = ?, updated_at = CURRENT_TIMESTAMP WHERE customer_id = ?',
-    [targetId, 'MERGED', sourceId],
-  );
-  await run('UPDATE customer SET updated_at = CURRENT_TIMESTAMP WHERE customer_id = ?', [targetId]);
+  await exec('BEGIN TRANSACTION;');
+  try {
+    await run(`
+      INSERT OR IGNORE INTO customer_tag (customer_id, tag_id, assigned_at, assigned_by)
+      SELECT ?, tag_id, assigned_at, assigned_by
+      FROM customer_tag
+      WHERE customer_id = ?
+    `, [targetId, sourceId]);
+    await run('DELETE FROM customer_tag WHERE customer_id = ?', [sourceId]);
+    await run(
+      'UPDATE customer_transaction SET customer_id = ? WHERE customer_id = ?',
+      [targetId, sourceId],
+    );
+    await run(
+      'UPDATE customer SET merged_into_id = ?, status = ?, updated_at = CURRENT_TIMESTAMP WHERE customer_id = ?',
+      [targetId, 'MERGED', sourceId],
+    );
+    await run('UPDATE customer SET updated_at = CURRENT_TIMESTAMP WHERE customer_id = ?', [targetId]);
+    await exec('COMMIT;');
+  } catch (error) {
+    await exec('ROLLBACK;');
+    throw error;
+  }
 }
 
 module.exports = {

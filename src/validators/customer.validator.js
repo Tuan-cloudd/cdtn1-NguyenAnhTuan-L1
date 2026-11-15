@@ -115,6 +115,29 @@ function validateCustomerFilters(query) {
   return filters;
 }
 
+function validateTransactionFilters(query = {}) {
+  const filters = {};
+  const hasPagination = query.page !== undefined || query.limit !== undefined;
+  if (hasPagination) {
+    const page = query.page === undefined ? 1 : Number(query.page);
+    const limit = query.limit === undefined ? 20 : Number(query.limit);
+    if (!Number.isSafeInteger(page) || page < 1
+        || !Number.isSafeInteger(limit) || limit < 1 || limit > 100
+        || page - 1 > Math.floor(Number.MAX_SAFE_INTEGER / limit)) {
+      throw new AppError(400, 'VALIDATION_ERROR', 'Tham số phân trang không hợp lệ');
+    }
+    filters.page = page;
+    filters.limit = limit;
+  }
+  if (query.search !== undefined) {
+    if (typeof query.search !== 'string' || query.search.trim().length > 100) {
+      throw new AppError(400, 'VALIDATION_ERROR', 'Từ khóa tìm kiếm giao dịch không hợp lệ');
+    }
+    filters.search = query.search.trim();
+  }
+  return filters;
+}
+
 module.exports = {
   validateCreateCustomer,
   validateUpdateCustomer,
@@ -123,4 +146,5 @@ module.exports = {
   validateMerge,
   validateCustomerId,
   validateCustomerFilters,
+  validateTransactionFilters,
 };

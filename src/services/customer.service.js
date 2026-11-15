@@ -2,12 +2,12 @@ const AppError = require('../errors/AppError');
 const repository = require('../repositories/customer.repository');
 const validator = require('../validators/customer.validator');
 
-async function createCustomer(body) {
+async function createCustomer(body, createdBy) {
   const customer = validator.validateCreateCustomer(body);
   if (await repository.findByPhone(customer.phone)) {
     throw new AppError(409, 'PHONE_EXISTS', 'Số điện thoại này đã được sử dụng');
   }
-  return repository.create(customer);
+  return repository.create(customer, createdBy);
 }
 
 function listCustomers(query) {
@@ -41,9 +41,12 @@ async function addCustomerTags(value, body) {
   return repository.addTags(customer.id, validator.validateTags(body));
 }
 
-async function getCustomerTransactions(value) {
+async function getCustomerTransactions(value, query) {
   const customer = await getCustomer(value);
-  return repository.findTransactions(customer.id);
+  return repository.findTransactions(
+    customer.id,
+    validator.validateTransactionFilters(query),
+  );
 }
 
 async function mergeCustomers(body) {

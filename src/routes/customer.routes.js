@@ -12,7 +12,17 @@ function requireAdmin(req, res, next) {
   next();
 }
 
-router.post('/', async (req, res) => res.status(201).json(await service.createCustomer(req.body)));
+function requireSales(req, res, next) {
+  if (req.user.role !== 'NVKD') {
+    next(new AppError(403, 'FORBIDDEN', 'Chỉ Nhân viên kinh doanh mới có quyền tạo hồ sơ'));
+    return;
+  }
+  next();
+}
+
+router.post('/', requireSales, async (req, res) => {
+  res.status(201).json(await service.createCustomer(req.body, req.user.id));
+});
 router.get('/', async (req, res) => res.json(await service.listCustomers(req.query)));
 
 router.post('/merge', requireAdmin, async (req, res) => {
@@ -26,7 +36,7 @@ router.delete('/:id', requireAdmin, async (req, res) => {
 });
 
 router.get('/:id/transactions', async (req, res) => {
-  res.json(await service.getCustomerTransactions(req.params.id));
+  res.json(await service.getCustomerTransactions(req.params.id, req.query));
 });
 router.post('/:id/tags', async (req, res) => {
   res.json(await service.addCustomerTags(req.params.id, req.body));

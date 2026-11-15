@@ -20,6 +20,10 @@ async function authHeaders(email = 'admin@example.com', password = 'Admin123!') 
   return { Authorization: `Bearer ${response.body.token}` };
 }
 
+async function salesHeaders() {
+  return authHeaders('sales@example.com', 'Sales123!');
+}
+
 test('health endpoint works', async () => {
   await resetDatabase();
 
@@ -74,15 +78,29 @@ test('logout invalidates the session token', async () => {
 test('customer can be created and retrieved', async () => {
   await resetDatabase();
   const headers = await authHeaders();
+  const creatorHeaders = await salesHeaders();
 
   const createResponse = await request(app)
     .post('/api/customers')
-    .set(headers)
+    .set(creatorHeaders)
     .send({ name: 'Nguyễn Văn A', phone: '0901234567' });
 
   assert.equal(createResponse.status, 201);
   assert.equal(createResponse.body.name, 'Nguyễn Văn A');
   assert.equal(createResponse.body.status, 'active');
+  const creator = await get(`
+    SELECT u.email
+    FROM customer c JOIN users u ON u.user_id = c.created_by
+    WHERE c.customer_id = ?
+  `, [createResponse.body.id]);
+  assert.equal(creator.email, 'sales@example.com');
+
+  const forbiddenCreate = await request(app)
+    .post('/api/customers')
+    .set(headers)
+    .send({ name: 'Admin Customer', phone: '0901234568' });
+  assert.equal(forbiddenCreate.status, 403);
+  assert.equal(forbiddenCreate.body.code, 'FORBIDDEN');
 
   const fetchResponse = await request(app)
     .get(`/api/customers/${createResponse.body.id}`)
@@ -93,7 +111,7 @@ test('customer can be created and retrieved', async () => {
 
 test('duplicate phone is rejected', async () => {
   await resetDatabase();
-  const headers = await authHeaders();
+  const headers = await salesHeaders();
 
   await request(app)
     .post('/api/customers')
@@ -111,7 +129,7 @@ test('duplicate phone is rejected', async () => {
 
 test('invalid email is rejected on update', async () => {
   await resetDatabase();
-  const headers = await authHeaders();
+  const headers = await salesHeaders();
 
   const createResponse = await request(app)
     .post('/api/customers')
@@ -129,7 +147,7 @@ test('invalid email is rejected on update', async () => {
 
 test('customer optional details can be edited and cleared', async () => {
   await resetDatabase();
-  const headers = await authHeaders();
+  const headers = await salesHeaders();
   const customer = await request(app)
     .post('/api/customers')
     .set(headers)
@@ -168,7 +186,7 @@ test('only an admin can delete a customer', async () => {
   const salesHeaders = await authHeaders('sales@example.com', 'Sales123!');
   const customer = await request(app)
     .post('/api/customers')
-    .set(adminHeaders)
+    .set(salesHeaders)
     .send({ name: 'Nguyễn Văn H', phone: '0906666777' });
   await request(app)
     .post(`/api/customers/${customer.body.id}/tags`)
@@ -206,10 +224,11 @@ test('only an admin can delete a customer', async () => {
 test('admin can lock customer status', async () => {
   await resetDatabase();
   const headers = await authHeaders();
+  const creatorHeaders = await salesHeaders();
 
   const createResponse = await request(app)
     .post('/api/customers')
-    .set(headers)
+    .set(creatorHeaders)
     .send({ name: 'Nguyễn Văn D', phone: '0902222333' });
 
   const response = await request(app)
@@ -228,7 +247,7 @@ test('sales account cannot perform admin-only actions', async () => {
   const salesHeaders = await authHeaders('sales@example.com', 'Sales123!');
   const customer = await request(app)
     .post('/api/customers')
-    .set(adminHeaders)
+    .set(salesHeaders)
     .send({ name: 'Nguyễn Văn F', phone: '0904444555' });
 
   const response = await request(app)
@@ -243,10 +262,11 @@ test('sales account cannot perform admin-only actions', async () => {
 test('customer tags and transaction history are returned', async () => {
   await resetDatabase();
   const headers = await authHeaders();
+  const creatorHeaders = await salesHeaders();
 
   const createResponse = await request(app)
     .post('/api/customers')
-    .set(headers)
+    .set(creatorHeaders)
     .send({ name: 'Nguyễn Văn E', phone: '0903333444' });
   const customerId = createResponse.body.id;
 
@@ -267,6 +287,67 @@ test('customer tags and transaction history are returned', async () => {
   assert.equal(transactionsResponse.status, 200);
   assert.equal(transactionsResponse.body.length, 1);
   assert.equal(transactionsResponse.body[0].behavior, 'frequent');
+
+  const sourceCustomer = await request(app)
+    .post('/api/customers')
+    .set(creatorHeaders)
+    .send({ name: 'Nguyễn Văn E Duplicate', phone: '0903333445' });
+  const sourceId = sourceCustomer.body.id;
+  await request(app)
+    .post(`/api/customers/${sourceId}/tags`)
+    .set(headers)
+    .send({ tags: ['VIP', 'Merged label'] });
+  await run(
+    'INSERT INTO customer_transaction (customer_id, amount, behavior_cat) VALUES (?, ?, ?)',
+    [sourceId, 50000, 'regular'],
+  );
+  const mergeResponse = await request(app)
+    .post('/api/customers/merge')
+    .set(headers)
+    .send({ sourceCustomerId: sourceId, targetCustomerId: customerId });
+  assert.equal(mergeResponse.status, 200);
+
+  const mergedCustomer = await request(app)
+    .get(`/api/customers/${customerId}`)
+    .set(headers);
+  assert.deepEqual(mergedCustomer.body.tags.sort(), ['Merged label', 'VIP']);
+  const mergedTransactions = await request(app)
+    .get(`/api/customers/${customerId}/transactions`)
+    .set(headers);
+  assert.equal(mergedTransactions.body.length, 2);
+  assert.deepEqual(
+    mergedTransactions.body.map((transaction) => transaction.behavior).sort(),
+    ['frequent', 'regular'],
+  );
+  const sourceTransactions = await request(app)
+    .get(`/api/customers/${sourceId}/transactions`)
+    .set(headers);
+  assert.deepEqual(sourceTransactions.body, []);
+
+  const pageResponse = await request(app)
+    .get(`/api/customers/${customerId}/transactions`)
+    .query({ page: 1, limit: 1 })
+    .set(headers);
+  assert.equal(pageResponse.status, 200);
+  assert.equal(pageResponse.body.length, 1);
+  const secondPageResponse = await request(app)
+    .get(`/api/customers/${customerId}/transactions`)
+    .query({ page: 2, limit: 1 })
+    .set(headers);
+  assert.equal(secondPageResponse.body.length, 1);
+  assert.notEqual(pageResponse.body[0].id, secondPageResponse.body[0].id);
+  const searchResponse = await request(app)
+    .get(`/api/customers/${customerId}/transactions`)
+    .query({ search: 'regular' })
+    .set(headers);
+  assert.equal(searchResponse.body.length, 1);
+  assert.equal(searchResponse.body[0].behavior, 'regular');
+  const invalidPageResponse = await request(app)
+    .get(`/api/customers/${customerId}/transactions`)
+    .query({ page: 0, limit: 1 })
+    .set(headers);
+  assert.equal(invalidPageResponse.status, 400);
+  assert.equal(invalidPageResponse.body.code, 'VALIDATION_ERROR');
 
   const filteredResponse = await request(app)
     .get('/api/customers')

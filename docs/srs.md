@@ -44,6 +44,9 @@ Các yêu cầu chức năng của hệ thống được chia theo độ ưu ti�
 Hệ thống cần đáp ứng các điều kiện về xác thực và kiểm soát dữ liệu:
 
 - **Bảo mật & Phân quyền:** Các chức năng nhạy cảm như "Gộp hồ sơ" bắt buộc phải được ẩn đối với Nhân viên kinh doanh; chỉ có tài khoản Quản trị viên mới được phép thao tác[cite: 9].
+- **Phân quyền tạo hồ sơ:** Chỉ Nhân viên kinh doanh (NVKD) được tạo hồ sơ; hệ thống phải ghi nhận đúng người dùng đang đăng nhập là người tạo.
+- **Gộp hồ sơ:** Nhãn và giao dịch phải được chuyển sang hồ sơ đích; toàn bộ thao tác gộp phải nguyên tử để tránh mất dữ liệu khi có lỗi.
+- **Lịch sử giao dịch:** Endpoint hỗ trợ `page` (mặc định 1), `limit` (mặc định 20 khi bật phân trang, tối đa 100) và `search` theo loại hành vi; response là mảng kết quả.
 - **Ràng buộc dữ liệu (Validation):**
   - Hệ thống không cho phép lưu nếu bỏ trống trường Số điện thoại[cite: 9].
   - Hệ thống sẽ báo lỗi và chặn tạo mới nếu Số điện thoại đã tồn tại trên hệ thống[cite: 9].
