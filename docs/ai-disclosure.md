@@ -18,21 +18,21 @@
 ### II. BẢNG KHAI BÁO CHI TIẾT
 
 | Công cụ AI | Dùng vào việc gì | Áp dụng ở phần nào (File / Mục) | Đã kiểm chứng & Chỉnh sửa thế nào |
-| :ChatGPT | :Goi y cach lam bang phieu pham vi | :Muc phieu pham vi bai toan ca nhan | : |
-dua theo va sua lai cho dung voi yeu cau
-| :Gemini | kiểm tra các tiêu chí có trong Sáu bước xử lý một User Story | :User story | dựa theo và chỉnh sửa lại đúng với yêu cầu bài
-| :Gemini | gợi ý vẽ use case diagram và kiểm tra Bảy lỗi thường gặp khi vẽ Use Case Diagram | use care diagram | dựa theo và chỉnh lại đúng với đề bài
-| :Gemini | lam file api-contract.md | api-contract.md | da doc lai va sua lai dung voi yeu cau
+|---|---|---|---|
+| ChatGPT | Gợi ý cách làm bảng phạm vi | Mục phạm vi bài toán cá nhân | Dựa theo và sửa lại cho đúng với yêu cầu |
+| Gemini | Kiểm tra các tiêu chí có trong Sáu bước xử lý một User Story | User story | Dựa theo và chỉnh sửa lại đúng với yêu cầu bài |
+| Gemini | Gợi ý vẽ use case diagram và kiểm tra Bảy lỗi thường gặp khi vẽ Use Case Diagram | Use case diagram | Dựa theo và chỉnh lại đúng với đề bài |
+| Gemini | Làm file api-contract.md | api-contract.md | Đọc lại và sửa lại đúng với yêu cầu |
+| Gemini | Làm file đặc tả yêu cầu phần mềm rút gọn | srs.md | Đọc lại |
+| ChatGPT | Gợi ý làm bảng ERD | ERD | Đọc và sửa lại |
+| ChatGPT | Gợi ý làm bảng Architecture Diagram | Architecture Diagram | Đọc và sửa lại đối chiếu với ERD và DDL |
+| ChatGPT | Tạo 3 Wireframe | Wireframe | Đọc và chỉnh sửa lại đồng nhất với các thông tin |
+| ChatGPT / Gemini | Gợi ý cấu trúc kịch bản kiểm thử và phân quyền cho các endpoint REST API | tests/api/test.js (TC-05, TC-08, TC-10) | Thực hiện lệnh npm test thật lần cuối cùng, kiểm tra từng assertion và đối chiếu với trạng thái HTTP thực tế và Express server |
+| GitHub Copilot / Gemini | Hỗ trợ rà soát nguyên nhân lỗi giao dịch SQLite khi gặp sự cố trong xử lý dữ liệu | src/services/customer.service.js, src/repositories/customer.repository.js | Chạy lại lỗi trên môi trường cục bộ, tùy chỉnh câu lệnh transaction và kiểm chứng bằng commit f9b4b cùng kết quả PASS của TC-09 |
+| ChatGPT / Gemini | Rà soát và hỗ trợ triển khai tài liệu hướng dẫn triển khai và API contract | docs/deployment-guide.md, docs/api-contract.md | Tự thực hiện lại toàn bộ bước triển khai và đối chiếu với hướng dẫn để đảm bảo tính chính xác |
+| ChatGPT / Gemini | Gợi ý và rà soát cấu trúc tài liệu đặc tả yêu cầu phần mềm, sơ đồ ERD, Architecture Diagram và Wireframe | srs.md, ERD, Architecture Diagram, Wireframe | Đọc kỹ, chỉnh sửa lại theo đúng yêu cầu của đề bài và đồng bộ dữ liệu giữa các tài liệu |
 
-| :Gemini | lam file đặc tả yêu cầu phần mềm rút gọn | srs.md| da doc lai
-| :ChatGPT | :Gợi ý làm bảng ERD | :ERD | Đọc và sửa lại
-| :ChatGPT | :Gợi ý làm bảng Architecture
-Diagram | :Architecture Diagram | :Đọc và sửa lại đối chiếu với
-ERD và DDl
-| :| :ChatGPT | :Tạo 3 Wireframe | :Wireframe | :Đọc và chỉnh sửa lại đồng nhất
-với các thông tin
-
-_Ghi chú:_
+_Ghi chú: Sử dụng AI chỉ hỗ trợ tham khảo ý tưởng, gợi ý cấu trúc và kiểm tra logic; toàn bộ nội dung cuối cùng vẫn do sinh viên xác nhận và chịu trách nhiệm._
 
 ---
 

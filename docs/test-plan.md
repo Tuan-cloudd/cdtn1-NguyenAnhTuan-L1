@@ -53,18 +53,18 @@
 
 | ID    | Mô tả test                      | Kịch bản                        | Dữ liệu đầu vào               | Kết quả mong đợi                      | Trạng thái |
 | ----- | ------------------------------- | ------------------------------- | ----------------------------- | ------------------------------------- | ---------- |
-| TC-01 | Health check API                | Gọi endpoint `/health`          | Không có                      | Trả về status 200 và thông tin server | Pending    |
-| TC-02 | Đăng nhập thành công            | Gửi email/password hợp lệ       | admin@example.com / Admin123! | Trả về token và trạng thái 200        | Pending    |
-| TC-03 | Đăng nhập sai mật khẩu          | Gửi email hợp lệ + mật khẩu sai | admin@example.com / sai123    | Trả về lỗi 401                        | Pending    |
-| TC-04 | Tạo hồ sơ khách hàng            | Gửi payload hợp lệ              | { ... }                       | Tạo mới thành công                    | Pending    |
-| TC-05 | Tạo hồ sơ thiếu trường bắt buộc | Gửi payload thiếu thông tin     | { ... }                       | Trả về lỗi validation                 | Pending    |
-| TC-06 | Lấy danh sách khách hàng        | Gọi GET `/api/customers`        | Không có                      | Trả về danh sách + status 200         | Pending    |
-| TC-07 | Lọc khách hàng theo trạng thái  | Gọi filter theo status          | active                        | Trả về dữ liệu đúng                   | Pending    |
-| TC-08 | Cập nhật hồ sơ                  | Gửi dữ liệu cập nhật            | { ... }                       | Dữ liệu được cập nhật                 | Pending    |
-| TC-09 | Gộp hồ sơ trùng                 | Gọi API gộp hồ sơ               | 2 hồ sơ có dữ liệu trùng      | Một hồ sơ giữ lại và dữ liệu hợp nhất | Pending    |
-| TC-10 | Khóa hồ sơ                      | Gửi request khóa                | customerId                    | Trạng thái chuyển sang locked         | Pending    |
-| TC-11 | Mở khóa hồ sơ                   | Gửi request mở khóa             | customerId                    | Trạng thái chuyển về active           | Pending    |
-| TC-12 | Lỗi không tìm thấy tài nguyên   | Gọi ID không tồn tại            | customerId không hợp lệ       | Trả về 404                            | Pending    |
+| TC-01 | Health check API                | Gọi endpoint `/health`          | Không có                      | Trả về status 200 và thông tin server | Pass       |
+| TC-02 | Đăng nhập thành công            | Gửi email/password hợp lệ       | admin@example.com / Admin123! | Trả về token và trạng thái 200        | Pass       |
+| TC-03 | Đăng nhập sai mật khẩu          | Gửi email hợp lệ + mật khẩu sai | admin@example.com / sai123    | Trả về lỗi 401                        | Pass       |
+| TC-04 | Tạo hồ sơ khách hàng            | Gửi payload hợp lệ              | { ... }                       | Tạo mới thành công                    | Pass       |
+| TC-05 | Tạo hồ sơ thiếu trường bắt buộc | Gửi payload thiếu thông tin     | { ... }                       | Trả về lỗi validation                 | Pass       |
+| TC-06 | Lấy danh sách khách hàng        | Gọi GET `/api/customers`        | Không có                      | Trả về danh sách + status 200         | Pass       |
+| TC-07 | Lọc khách hàng theo trạng thái  | Gọi filter theo status          | active                        | Trả về dữ liệu đúng                   | Pass       |
+| TC-08 | Cập nhật hồ sơ                  | Gửi dữ liệu cập nhật            | { ... }                       | Dữ liệu được cập nhật                 | Pass       |
+| TC-09 | Gộp hồ sơ trùng                 | Gọi API gộp hồ sơ               | 2 hồ sơ có dữ liệu trùng      | Một hồ sơ giữ lại và dữ liệu hợp nhất | Pass       |
+| TC-10 | Khóa hồ sơ                      | Gửi request khóa                | customerId                    | Trạng thái chuyển sang locked         | Pass       |
+| TC-11 | Mở khóa hồ sơ                   | Gửi request mở khóa             | customerId                    | Trạng thái chuyển về active           | Pass       |
+| TC-12 | Lỗi không tìm thấy tài nguyên   | Gọi ID không tồn tại            | customerId không hợp lệ       | Trả về 404                            | Pass       |
 
 ## 7. Link liên quan
 
